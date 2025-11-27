@@ -1,0 +1,413 @@
+<!doctype html>
+<html lang="es">
+<meta charset="utf-8">
+<title>Horarios UNAB</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  body{
+    font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+    margin:1.5rem;
+    line-height:1.35
+  }
+  fieldset{
+    border:1px solid #ccc;
+    border-radius:8px;
+    padding:1rem;
+    margin:0 0 1rem
+  }
+  label{display:block;margin:.35rem 0 .15rem}
+  .row{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:.6rem .8rem
+  }
+  button{
+    font:inherit;
+    padding:.5rem .8rem;
+    margin-right:.5rem
+  }
+  .chips{display:flex;gap:.35rem;flex-wrap:wrap}
+  .chip{
+    border:1px solid #bbb;
+    border-radius:999px;
+    padding:.1rem .6rem;
+    font-size:.9rem;
+    background:#fafafa
+  }
+  .inline{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+
+  /* layout en columnas */
+  .columns{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
+    gap:1.2rem;
+    align-items:flex-start;
+  }
+
+  /* login embebido */
+  #login-box{
+    width:380px;
+    height:180px;
+    overflow:hidden;
+    position:relative;
+    border:1px solid #333;
+  }
+  #login-box iframe{
+    position:absolute;
+    top:-220px;
+    left:-60px;
+    width:600px;
+    height:600px;
+  }
+</style>
+<body>
+<h1>Consulta de Horarios UNAB</h1>
+
+<div class="inline" style="margin:0 0 1rem">
+  <button onclick="toggleLogin()">Acceder</button>
+  <button onclick="borrarMem()">Borrar memoria</button>
+</div>
+
+<div id="login-box" style="display:none; margin:0 0 1rem;">
+  <iframe src="https://ssb.unab.cl/pls/PROD/twbkwbis.P_WWWLogin"></iframe>
+</div>
+
+<form id="ui" onsubmit="return false;">
+
+  <div class="columns">
+
+    <!-- COLUMNA 1: HORARIOS -->
+    <div>
+      <fieldset>
+        <legend>Horarios</legend>
+        <div class="row">
+          <div>
+            <label>Período horarios (<code>term_in</code>)</label>
+            <input id="term_in" value="202520" required pattern="\\d{6}">
+            <small>6 dígitos Banner, ej: 202520</small>
+          </div>
+
+          <div>
+            <label>Materias</label>
+            <label><input type="checkbox" class="subj" value="LQUI" checked> LQUI</label>
+            <label><input type="checkbox" class="subj" value="QUI" checked> QUI</label>
+            <label><input type="checkbox" class="subj" value="QUIM" checked> QUIM</label>
+            <label><input type="checkbox" class="subj" value="TQUI" checked> TQUI</label>
+            <label>Extras (coma): <input id="subj_extra" placeholder="EJ: QUM1,QUM2"></label>
+            <div class="chips" id="materias_preview"></div>
+          </div>
+
+          <div>
+            <label>Campus</label>
+            <label><input type="checkbox" class="camp" value="BEL" checked> BEL</label>
+            <label><input type="checkbox" class="camp" value="CAS"> CAS</label>
+            <label><input type="checkbox" class="camp" value="CON"> CON</label>
+            <label><input type="checkbox" class="camp" value="RAN"> RAN</label>
+            <label><input type="checkbox" class="camp" value="REP"> REP</label>
+            <label><input type="checkbox" class="camp" value="VIN"> VIN</label>
+            <label>Otros (coma): <input id="camp_extra" placeholder="EJ: XXX,YYY"></label>
+            <div class="chips" id="campus_preview"></div>
+          </div>
+
+          <div>
+            <label>Tipo (<code>sel_schd</code>)</label>
+            <select id="sel_schd">
+              <option value="%">%</option>
+              <option value="AYU">AYU</option>
+              <option value="CHA">CHA</option>
+              <option value="CLI">CLI</option>
+              <option value="DEP">DEP</option>
+              <option value="LAB">LAB</option>
+              <option value="PRA">PRA</option>
+              <option value="SEM">SEM</option>
+              <option value="TAL">TAL</option>
+              <option value="TEO" selected>TEO</option>
+              <option value="TP">TP</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="inline" style="margin-top:.8rem">
+          <button onclick="submitModo()">Buscar combinada</button>
+        </div>
+      </fieldset>
+    </div>
+
+    <!-- COLUMNA 2: CURSO PUNTUAL + HERRAMIENTAS DOCENTE -->
+    <div>
+
+      <fieldset>
+        <legend>Ver curso puntual</legend>
+        <div class="row">
+          <div>
+            <label>Período curso (<code>term_in</code>)</label>
+            <input id="term_curso" value="202520" required pattern="\\d{6}">
+            <small>6 dígitos Banner. Independiente de horarios.</small>
+          </div>
+          <div>
+            <label>Materia (<code>subj_in</code>)</label>
+            <input id="curso_subj" placeholder="EJ: QUIM" value="QUIM">
+          </div>
+          <div>
+            <label>Curso (<code>crse_in</code>)</label>
+            <input id="curso_code" placeholder="EJ: 300" inputmode="numeric">
+          </div>
+          <div>
+            <label>Tipo (<code>schd_in</code>)</label>
+            <select id="curso_schd">
+              <option value="">(todos)</option>
+              <option value="AYU">AYU</option>
+              <option value="CHA">CHA</option>
+              <option value="CLI">CLI</option>
+              <option value="DEP">DEP</option>
+              <option value="LAB">LAB</option>
+              <option value="PRA">PRA</option>
+              <option value="SEM">SEM</option>
+              <option value="TAL">TAL</option>
+              <option value="TEO" selected>TEO</option>
+              <option value="TP">TP</option>
+            </select>
+          </div>
+        </div>
+        <div class="inline" style="margin-top:.5rem">
+          <button onclick="verCurso()">Abrir curso</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Herramientas docente</legend>
+        <div class="row">
+          <div>
+            <label>Período docente (<code>term</code>)</label>
+            <input id="term_doc" value="202610" required pattern="\\d{6}">
+            <small>6 dígitos Banner. Independiente de horarios y curso.</small>
+          </div>
+          <div>
+            <label>CRN</label>
+            <input id="crn_docente" placeholder="EJ: 17957" inputmode="numeric">
+          </div>
+        </div>
+        <div class="inline" style="margin-top:.5rem">
+          <button onclick="verHorarioDocente()">Ver horario del docente</button>
+          <button onclick="verListaClases()">Ver lista de clases</button>
+          <button onclick="verLibroCalificaciones()">Ver libro de calificaciones</button>
+          <small>Horario, lista de clases y libro usan el período docente; lista y libro además usan el CRN.</small>
+        </div>
+      </fieldset>
+
+    </div>
+  </div>
+</form>
+
+<!-- Formulario base. TODO abre en pestaña nueva -->
+<form id="base" method="post" action="https://ssb.unab.cl/pls/PROD/bwlkffcs.p_disp_dyn_sched_list" target="_blank" style="display:none">
+  <!-- dummies en orden Banner -->
+  <input name="term_in">
+  <input name="sel_subj"  value="dummy">
+  <input name="sel_day"   value="dummy">
+  <input name="sel_schd"  value="dummy">
+  <input name="sel_insm"  value="dummy">
+  <input name="sel_camp"  value="dummy">
+  <input name="sel_levl"  value="dummy">
+  <input name="sel_sess"  value="dummy">
+  <input name="sel_instr" value="dummy">
+  <input name="sel_ptrm"  value="dummy">
+  <input name="sel_attr"  value="dummy">
+  <!-- reales por defecto -->
+  <input name="sel_crse"   value="">
+  <input name="sel_title"  value="">
+  <input name="sel_schd"   value="%">
+  <input name="sel_insm"   value="%">
+  <input name="sel_from_cred" value="">
+  <input name="sel_to_cred"   value="">
+  <input name="sel_camp"   value="%">
+  <input name="sel_levl"   value="%">
+  <input name="sel_ptrm"   value="%">
+  <input name="sel_instr"  value="%">
+  <input name="sel_sess"   value="%">
+  <input name="sel_attr"   value="%">
+  <input name="sel_day"    value="%">
+  <input name="begin_hh"   value="0">
+  <input name="begin_mi"   value="0">
+  <input name="begin_ap"   value="a">
+  <input name="end_hh"     value="0">
+  <input name="end_mi"     value="0">
+  <input name="end_ap"     value="a">
+</form>
+
+<script>
+const KEY="unab_horarios_last";
+function $(id){ return document.getElementById(id); }
+function uniq(a){ return Array.from(new Set(a)); }
+function splitExtras(v){ return (v||"").split(",").map(s=>s.trim()).filter(Boolean); }
+function validarTerm(term){ if(!/^\d{6}$/.test(term)) throw new Error("Período debe tener 6 dígitos, ej: 202520"); }
+
+function toggleLogin(){
+  const box = document.getElementById("login-box");
+  box.style.display = (box.style.display === "none" || !box.style.display) ? "block" : "none";
+}
+
+function getMaterias(){
+  const base = Array.from(document.querySelectorAll(".subj:checked")).map(e=>e.value);
+  const extra = splitExtras($("subj_extra").value);
+  const all = uniq([...base,...extra]);
+  if(!all.length) throw new Error("Selecciona o ingresa al menos una materia.");
+  return all;
+}
+function getCampusLista(){
+  const base = Array.from(document.querySelectorAll(".camp:checked")).map(e=>e.value);
+  const extra = splitExtras($("camp_extra").value);
+  const all = uniq([...base,...extra]);
+  if(!all.length) throw new Error("Selecciona o ingresa al menos un campus.");
+  return all;
+}
+function previewChips(id, arr){
+  const box=$(id);
+  box.innerHTML="";
+  arr.forEach(v=>{
+    const s=document.createElement("span");
+    s.className="chip";
+    s.textContent=v;
+    box.appendChild(s);
+  });
+}
+
+function makeFormClone(){
+  const f=$("base").cloneNode(true);
+  f.style.display="none";
+  document.body.appendChild(f);
+  return f;
+}
+function fillCommon(form, term, schd, materias){
+  form.elements.term_in.value = term;
+  form.querySelector('input[name="sel_schd"][value="%"]').value = schd || "%";
+
+  // materias reales
+  [...form.querySelectorAll('input[name="sel_subj"]')].slice(1).forEach(n=>n.remove());
+  for(const val of materias){
+    const n=document.createElement("input");
+    n.type="hidden";
+    n.name="sel_subj";
+    n.value=val;
+    form.appendChild(n);
+  }
+}
+
+function submitModo(){
+  try{
+    const term=$("term_in").value.trim(); validarTerm(term);
+    const schd=$("sel_schd").value.trim()||"%";
+    const materias=getMaterias();
+    const campus=getCampusLista();
+
+    const f=makeFormClone(); f.target="_blank";
+    fillCommon(f,term,schd,materias);
+    f.querySelectorAll('input[name="sel_camp"]')[1].value = (campus.length===1?campus[0]:"%");
+    f.submit(); f.remove();
+  }catch(e){ alert(e.message||e); }
+}
+
+function verCurso(){
+  try{
+    const term=$("term_curso").value.trim(); validarTerm(term);
+    const subj=$("curso_subj").value.trim().toUpperCase();
+    const crse=$("curso_code").value.trim();
+    const schd=$("curso_schd").value.trim();
+    if(!subj) throw new Error("Materia requerida (subj_in).");
+    if(!crse) throw new Error("Código de curso requerido (crse_in).");
+    const base="https://ssb.unab.cl/pls/PROD/bwckctlg.p_disp_listcrse";
+    const q=new URLSearchParams({
+      term_in:term,
+      subj_in:subj,
+      crse_in:crse,
+      schd_in:schd||""
+    });
+    window.open(base+"?"+q.toString(), "_blank");
+  }catch(e){ alert(e.message||e); }
+}
+
+/* herramientas docente */
+function verHorarioDocente(){
+  try{
+    const termDoc=$("term_doc").value.trim(); validarTerm(termDoc);
+    const base="https://ssb.unab.cl/pls/PROD/bwlkifac.P_FacSched";
+    const q=new URLSearchParams({term:termDoc});
+    window.open(base+"?"+q.toString(), "_blank");
+  }catch(e){ alert(e.message||e); }
+}
+
+function verListaClases(){
+  try{
+    const termDoc=$("term_doc").value.trim(); validarTerm(termDoc);
+    const crn=$("crn_docente").value.trim();
+    if(!crn) throw new Error("CRN requerido.");
+    const base="https://ssb.unab.cl/pls/PROD/bwlkfcwl.P_FacClaListSum";
+    const q=new URLSearchParams({term:termDoc, crn});
+    window.open(base+"?"+q.toString(), "_blank");
+  }catch(e){ alert(e.message||e); }
+}
+
+function verLibroCalificaciones(){
+  try{
+    const termDoc=$("term_doc").value.trim(); validarTerm(termDoc);
+    const crn=$("crn_docente").value.trim();
+    if(!crn) throw new Error("CRN requerido.");
+    const base="https://ssb.unab.cl/pls/PROD/bwlkegrb.P_FacGradeComponents";
+    const q=new URLSearchParams({term:termDoc,crn});
+    window.open(base+"?"+q.toString(), "_blank");
+  }catch(e){ alert(e.message||e); }
+}
+
+/* memoria mínima (solo búsqueda principal) */
+function saveMem(){
+  const obj={
+    term:$("term_in").value.trim(),
+    materias:Array.from(document.querySelectorAll(".subj:checked")).map(e=>e.value).concat(splitExtras($("subj_extra").value)),
+    campus:Array.from(document.querySelectorAll(".camp:checked")).map(e=>e.value).concat(splitExtras($("camp_extra").value)),
+    schd:$("sel_schd").value.trim()
+  };
+  try{ localStorage.setItem(KEY, JSON.stringify(obj)); }catch(e){}
+  try{
+    previewChips("materias_preview", uniq(obj.materias).filter(Boolean));
+    previewChips("campus_preview",   uniq(obj.campus).filter(Boolean));
+  }catch(e){}
+}
+function loadMem(){
+  try{
+    const s=localStorage.getItem(KEY); if(!s) return;
+    const o=JSON.parse(s);
+    if(o.term) $("term_in").value=o.term;
+    if(o.schd) $("sel_schd").value=o.schd;
+    if(Array.isArray(o.materias)){
+      document.querySelectorAll(".subj").forEach(cb=>cb.checked=false);
+      const set=new Set(o.materias);
+      document.querySelectorAll(".subj").forEach(cb=>{ if(set.has(cb.value)) cb.checked=true; });
+      const extras=o.materias.filter(v=>!["LQUI","QUI","QUIM","TQUI"].includes(v));
+      $("subj_extra").value=extras.join(",");
+      previewChips("materias_preview", uniq(o.materias).filter(Boolean));
+    }
+    if(Array.isArray(o.campus)){
+      document.querySelectorAll(".camp").forEach(cb=>cb.checked=false);
+      const setc=new Set(o.campus);
+      document.querySelectorAll(".camp").forEach(cb=>{ if(setc.has(cb.value)) cb.checked=true; });
+      const extrasC=o.campus.filter(v=>!["BEL","CAS","CON","RAN","REP","VIN"].includes(v));
+      $("camp_extra").value=extrasC.join(",");
+      previewChips("campus_preview", uniq(o.campus).filter(Boolean));
+    }
+  }catch(e){}
+}
+document.addEventListener("DOMContentLoaded", ()=>{
+  loadMem();
+  document.querySelectorAll(".subj,.camp,#subj_extra,#camp_extra,#term_in,#sel_schd")
+    .forEach(el=>{
+      el.addEventListener("change", saveMem);
+      el.addEventListener("input", saveMem);
+    });
+});
+function borrarMem(){
+  localStorage.removeItem(KEY);
+  alert("Memoria borrada.");
+}
+</script>
+</body>
+</html>
