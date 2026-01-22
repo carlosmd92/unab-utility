@@ -469,12 +469,11 @@ function verLibroCalificaciones(){
 /* (1) historial de asignaturas */
 function verHistorialAsignaturas(){
   try{
-    const termDoc=$("term_doc").value.trim(); validarTerm(termDoc);
     const base="https://ssb.unab.cl/pls/PROD/bwlkasgn.P_FacAssignHist";
-    const q=new URLSearchParams({term:termDoc});
-    window.open(base+"?"+q.toString(), "_blank");
+    window.open(base, "_blank");
   }catch(e){ alert(e.message||e); }
 }
+
 
 /* memoria mínima (solo búsqueda principal) */
 function saveMem(){
