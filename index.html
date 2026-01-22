@@ -3,28 +3,33 @@
 <meta charset="utf-8">
 <title>Horarios UNAB</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
+
 <style>
   body{
     font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
     margin:1.5rem;
-    line-height:1.35
+    line-height:1.35;
   }
   fieldset{
     border:1px solid #ccc;
     border-radius:8px;
     padding:1rem;
-    margin:0 0 1rem
+    margin:0 0 1rem;
+    background:#fff;
   }
   label{display:block;margin:.35rem 0 .15rem}
+  input, select{font:inherit; padding:.35rem .45rem; max-width:100%}
+  small{display:block; opacity:.85}
+
   .row{
     display:grid;
     grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:.6rem .8rem
+    gap:.6rem .8rem;
   }
   button{
     font:inherit;
     padding:.5rem .8rem;
-    margin-right:.5rem
+    margin-right:.5rem;
   }
   .chips{display:flex;gap:.35rem;flex-wrap:wrap}
   .chip{
@@ -32,7 +37,7 @@
     border-radius:999px;
     padding:.1rem .6rem;
     font-size:.9rem;
-    background:#fafafa
+    background:#fafafa;
   }
   .inline{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 
@@ -42,6 +47,22 @@
     grid-template-columns:repeat(auto-fit,minmax(360px,1fr));
     gap:1.2rem;
     align-items:flex-start;
+  }
+
+  /* grupos de checkboxes en horizontal (para ahorrar alto) */
+  .checkgroup{
+    display:flex;
+    gap:.6rem 1rem;
+    flex-wrap:wrap;
+    align-items:center;
+    margin:.25rem 0 .35rem;
+  }
+  .checkgroup label{
+    display:inline-flex;
+    gap:.35rem;
+    align-items:center;
+    margin:0;
+    white-space:nowrap;
   }
 
   /* login embebido */
@@ -59,7 +80,23 @@
     width:600px;
     height:600px;
   }
+
+  /* mejoras para móvil/tablet */
+  @media (max-width: 900px){
+    body{margin:1rem;}
+    .columns{grid-template-columns:1fr;}
+    #login-box{width:100%; max-width:520px;}
+  }
+  @media (max-width: 520px){
+    body{margin:.75rem;}
+    fieldset{padding:.85rem;}
+    button{width:100%; margin-right:0;}
+    .inline{align-items:stretch;}
+    .inline > *{flex:1 1 auto;}
+    #login-box{height:200px;}
+  }
 </style>
+
 <body>
 <h1>Consulta de Horarios UNAB</h1>
 
@@ -80,6 +117,7 @@
     <div>
       <fieldset>
         <legend>Horarios</legend>
+
         <div class="row">
           <div>
             <label>Período horarios (<code>term_in</code>)</label>
@@ -89,22 +127,26 @@
 
           <div>
             <label>Materias</label>
-            <label><input type="checkbox" class="subj" value="LQUI" checked> LQUI</label>
-            <label><input type="checkbox" class="subj" value="QUI" checked> QUI</label>
-            <label><input type="checkbox" class="subj" value="QUIM" checked> QUIM</label>
-            <label><input type="checkbox" class="subj" value="TQUI" checked> TQUI</label>
+            <div class="checkgroup" aria-label="Materias">
+              <label><input type="checkbox" class="subj" value="LQUI" checked> LQUI</label>
+              <label><input type="checkbox" class="subj" value="QUI"  checked> QUI</label>
+              <label><input type="checkbox" class="subj" value="QUIM" checked> QUIM</label>
+              <label><input type="checkbox" class="subj" value="TQUI" checked> TQUI</label>
+            </div>
             <label>Extras (coma): <input id="subj_extra" placeholder="EJ: QUM1,QUM2"></label>
             <div class="chips" id="materias_preview"></div>
           </div>
 
           <div>
             <label>Campus</label>
-            <label><input type="checkbox" class="camp" value="BEL" checked> BEL</label>
-            <label><input type="checkbox" class="camp" value="CAS"> CAS</label>
-            <label><input type="checkbox" class="camp" value="CON"> CON</label>
-            <label><input type="checkbox" class="camp" value="RAN"> RAN</label>
-            <label><input type="checkbox" class="camp" value="REP"> REP</label>
-            <label><input type="checkbox" class="camp" value="VIN"> VIN</label>
+            <div class="checkgroup" aria-label="Campus">
+              <label><input type="checkbox" class="camp" value="BEL" checked> BEL</label>
+              <label><input type="checkbox" class="camp" value="CAS"> CAS</label>
+              <label><input type="checkbox" class="camp" value="CON"> CON</label>
+              <label><input type="checkbox" class="camp" value="RAN"> RAN</label>
+              <label><input type="checkbox" class="camp" value="REP"> REP</label>
+              <label><input type="checkbox" class="camp" value="VIN"> VIN</label>
+            </div>
             <label>Otros (coma): <input id="camp_extra" placeholder="EJ: XXX,YYY"></label>
             <div class="chips" id="campus_preview"></div>
           </div>
@@ -138,20 +180,24 @@
 
       <fieldset>
         <legend>Ver curso puntual</legend>
+
         <div class="row">
           <div>
             <label>Período curso (<code>term_in</code>)</label>
             <input id="term_curso" value="202520" required pattern="\\d{6}">
             <small>6 dígitos Banner. Independiente de horarios.</small>
           </div>
+
           <div>
             <label>Materia (<code>subj_in</code>)</label>
             <input id="curso_subj" placeholder="EJ: QUIM" value="QUIM">
           </div>
+
           <div>
             <label>Curso (<code>crse_in</code>)</label>
             <input id="curso_code" placeholder="EJ: 300" inputmode="numeric">
           </div>
+
           <div>
             <label>Tipo (<code>schd_in</code>)</label>
             <select id="curso_schd">
@@ -168,32 +214,56 @@
               <option value="TP">TP</option>
             </select>
           </div>
+
+          <!-- (3) campus independiente del bloque horarios -->
+          <div>
+            <label>Campus (curso puntual)</label>
+            <select id="curso_camp">
+              <option value="%">(todos)</option>
+              <option value="BEL">BEL</option>
+              <option value="CAS">CAS</option>
+              <option value="CON">CON</option>
+              <option value="RAN">RAN</option>
+              <option value="REP">REP</option>
+              <option value="VIN">VIN</option>
+            </select>
+            <small>Se aplica solo al “Buscar curso”.</small>
+          </div>
         </div>
+
         <div class="inline" style="margin-top:.5rem">
-          <button onclick="verCurso()">Buscar curso (con campus)</button>
-          <button onclick="verCursoCatalogo()">Abrir catálogo (sin campus)</button>
-          <small>“Buscar curso” usa el campus seleccionado en Horarios (si hay 1 campus). Si hay varios, no filtra (usa %).</small>
+          <button onclick="verCurso()">Buscar curso</button>
+          <button onclick="verCursoCatalogo()">Abrir catálogo</button>
         </div>
       </fieldset>
 
       <fieldset>
         <legend>Herramientas docente</legend>
+
         <div class="row">
           <div>
             <label>Período docente (<code>term</code>)</label>
             <input id="term_doc" value="202610" required pattern="\\d{6}">
             <small>6 dígitos Banner. Independiente de horarios y curso.</small>
           </div>
+
           <div>
             <label>CRN</label>
             <input id="crn_docente" placeholder="EJ: 17957" inputmode="numeric">
           </div>
         </div>
+
         <div class="inline" style="margin-top:.5rem">
           <button onclick="verHorarioDocente()">Ver horario del docente</button>
           <button onclick="verListaClases()">Ver lista de clases</button>
           <button onclick="verLibroCalificaciones()">Ver libro de calificaciones</button>
-          <small>Horario, lista de clases y libro usan el período docente; lista y libro además usan el CRN.</small>
+
+          <!-- (1) historial de asignaturas -->
+          <button onclick="verHistorialAsignaturas()">Historial de asignaturas</button>
+
+          <small>
+            Horario e historial usan el período docente. Lista y libro además usan el CRN.
+          </small>
         </div>
       </fieldset>
 
@@ -201,7 +271,7 @@
   </div>
 </form>
 
-<!-- Formulario base. TODO abre en pestaña nueva -->
+<!-- Formulario base (Dynamic Schedule). TODO abre en pestaña nueva -->
 <form id="base" method="post" action="https://ssb.unab.cl/pls/PROD/bwlkffcs.p_disp_dyn_sched_list" target="_blank" style="display:none">
   <!-- dummies en orden Banner -->
   <input name="term_in">
@@ -283,8 +353,7 @@ function makeFormClone(){
 function fillCommon(form, term, schd, materias){
   form.elements.term_in.value = term;
 
-  // OJO: el "input[name=sel_schd][value=%]" existe solo como dummy; el real está más abajo.
-  // Para evitar ambigüedad, setea explícitamente el ÚLTIMO sel_schd (el real por defecto).
+  // setea el ÚLTIMO sel_schd (el "real" por defecto)
   const schdInputs = form.querySelectorAll('input[name="sel_schd"]');
   schdInputs[schdInputs.length - 1].value = schd || "%";
 
@@ -309,7 +378,6 @@ function submitModo(){
     const f=makeFormClone(); f.target="_blank";
     fillCommon(f,term,schd,materias);
 
-    // campus: si hay 1 campus, fija; si hay >1, usa "%" (sin filtro)
     const campInputs = f.querySelectorAll('input[name="sel_camp"]');
     campInputs[campInputs.length - 1].value = (campus.length===1 ? campus[0] : "%");
 
@@ -318,8 +386,8 @@ function submitModo(){
 }
 
 /* === VER CURSO PUNTUAL ===
-   verCurso(): usa Dynamic Schedule (sí admite campus)
-   verCursoCatalogo(): mantiene el catálogo (no campus)
+   verCurso(): usa Dynamic Schedule (con campus propio del bloque de curso)
+   verCursoCatalogo(): abre catálogo (sin campus)
 */
 function verCurso(){
   try{
@@ -327,25 +395,20 @@ function verCurso(){
     const subj=$("curso_subj").value.trim().toUpperCase();
     const crse=$("curso_code").value.trim();
     const schd=$("curso_schd").value.trim() || "%";
+    const camp=$("curso_camp").value.trim() || "%";
 
     if(!subj) throw new Error("Materia requerida (subj_in).");
     if(!crse) throw new Error("Código de curso requerido (crse_in).");
-
-    const campus=getCampusLista();
 
     const f=makeFormClone();
     f.target="_blank";
     f.action="https://ssb.unab.cl/pls/PROD/bwlkffcs.p_disp_dyn_sched_list";
 
-    // solo la materia del curso puntual
     fillCommon(f, term, schd, [subj]);
-
-    // filtrar por código de curso
     f.elements.sel_crse.value = crse;
 
-    // campus: si hay 1 campus, fija; si hay >1, usa "%" (sin filtro)
     const campInputs = f.querySelectorAll('input[name="sel_camp"]');
-    campInputs[campInputs.length - 1].value = (campus.length===1 ? campus[0] : "%");
+    campInputs[campInputs.length - 1].value = camp;
 
     f.submit();
     f.remove();
@@ -399,6 +462,16 @@ function verLibroCalificaciones(){
     if(!crn) throw new Error("CRN requerido.");
     const base="https://ssb.unab.cl/pls/PROD/bwlkegrb.P_FacGradeComponents";
     const q=new URLSearchParams({term:termDoc,crn});
+    window.open(base+"?"+q.toString(), "_blank");
+  }catch(e){ alert(e.message||e); }
+}
+
+/* (1) historial de asignaturas */
+function verHistorialAsignaturas(){
+  try{
+    const termDoc=$("term_doc").value.trim(); validarTerm(termDoc);
+    const base="https://ssb.unab.cl/pls/PROD/bwlkasgn.P_FacAssignHist";
+    const q=new URLSearchParams({term:termDoc});
     window.open(base+"?"+q.toString(), "_blank");
   }catch(e){ alert(e.message||e); }
 }
