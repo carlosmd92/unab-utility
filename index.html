@@ -170,7 +170,9 @@
           </div>
         </div>
         <div class="inline" style="margin-top:.5rem">
-          <button onclick="verCurso()">Abrir curso</button>
+          <button onclick="verCurso()">Buscar curso (con campus)</button>
+          <button onclick="verCursoCatalogo()">Abrir catálogo (sin campus)</button>
+          <small>“Buscar curso” usa el campus seleccionado en Horarios (si hay 1 campus). Si hay varios, no filtra (usa %).</small>
         </div>
       </fieldset>
 
@@ -280,7 +282,11 @@ function makeFormClone(){
 }
 function fillCommon(form, term, schd, materias){
   form.elements.term_in.value = term;
-  form.querySelector('input[name="sel_schd"][value="%"]').value = schd || "%";
+
+  // OJO: el "input[name=sel_schd][value=%]" existe solo como dummy; el real está más abajo.
+  // Para evitar ambigüedad, setea explícitamente el ÚLTIMO sel_schd (el real por defecto).
+  const schdInputs = form.querySelectorAll('input[name="sel_schd"]');
+  schdInputs[schdInputs.length - 1].value = schd || "%";
 
   // materias reales
   [...form.querySelectorAll('input[name="sel_subj"]')].slice(1).forEach(n=>n.remove());
@@ -302,12 +308,51 @@ function submitModo(){
 
     const f=makeFormClone(); f.target="_blank";
     fillCommon(f,term,schd,materias);
-    f.querySelectorAll('input[name="sel_camp"]')[1].value = (campus.length===1?campus[0]:"%");
+
+    // campus: si hay 1 campus, fija; si hay >1, usa "%" (sin filtro)
+    const campInputs = f.querySelectorAll('input[name="sel_camp"]');
+    campInputs[campInputs.length - 1].value = (campus.length===1 ? campus[0] : "%");
+
     f.submit(); f.remove();
   }catch(e){ alert(e.message||e); }
 }
 
+/* === VER CURSO PUNTUAL ===
+   verCurso(): usa Dynamic Schedule (sí admite campus)
+   verCursoCatalogo(): mantiene el catálogo (no campus)
+*/
 function verCurso(){
+  try{
+    const term=$("term_curso").value.trim(); validarTerm(term);
+    const subj=$("curso_subj").value.trim().toUpperCase();
+    const crse=$("curso_code").value.trim();
+    const schd=$("curso_schd").value.trim() || "%";
+
+    if(!subj) throw new Error("Materia requerida (subj_in).");
+    if(!crse) throw new Error("Código de curso requerido (crse_in).");
+
+    const campus=getCampusLista();
+
+    const f=makeFormClone();
+    f.target="_blank";
+    f.action="https://ssb.unab.cl/pls/PROD/bwlkffcs.p_disp_dyn_sched_list";
+
+    // solo la materia del curso puntual
+    fillCommon(f, term, schd, [subj]);
+
+    // filtrar por código de curso
+    f.elements.sel_crse.value = crse;
+
+    // campus: si hay 1 campus, fija; si hay >1, usa "%" (sin filtro)
+    const campInputs = f.querySelectorAll('input[name="sel_camp"]');
+    campInputs[campInputs.length - 1].value = (campus.length===1 ? campus[0] : "%");
+
+    f.submit();
+    f.remove();
+  }catch(e){ alert(e.message||e); }
+}
+
+function verCursoCatalogo(){
   try{
     const term=$("term_curso").value.trim(); validarTerm(term);
     const subj=$("curso_subj").value.trim().toUpperCase();
