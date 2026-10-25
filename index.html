@@ -106,7 +106,7 @@
 </div>
 
 <div id="login-box" style="display:none; margin:0 0 1rem;">
-  <iframe src="https://ssb.unab.cl/pls/PROD/twbkwbis.P_WWWLogin"></iframe>
+  <iframe src="https://ssb8.unab.cl/PROD/twbkwbis.P_WWWLogin"></iframe>
 </div>
 
 <form id="ui" onsubmit="return false;">
@@ -272,7 +272,7 @@
 </form>
 
 <!-- Formulario base (Dynamic Schedule). TODO abre en pestaña nueva -->
-<form id="base" method="post" action="https://ssb.unab.cl/pls/PROD/bwlkffcs.p_disp_dyn_sched_list" target="_blank" style="display:none">
+<form id="base" method="post" action="https://ssb8.unab.cl/PROD/bwlkffcs.p_disp_dyn_sched_list" target="_blank" style="display:none">
   <!-- dummies en orden Banner -->
   <input name="term_in">
   <input name="sel_subj"  value="dummy">
@@ -402,7 +402,7 @@ function verCurso(){
 
     const f=makeFormClone();
     f.target="_blank";
-    f.action="https://ssb.unab.cl/pls/PROD/bwlkffcs.p_disp_dyn_sched_list";
+    f.action="https://ssb8.unab.cl/PROD/bwlkffcs.p_disp_dyn_sched_list";
 
     fillCommon(f, term, schd, [subj]);
     f.elements.sel_crse.value = crse;
@@ -423,7 +423,7 @@ function verCursoCatalogo(){
     const schd=$("curso_schd").value.trim();
     if(!subj) throw new Error("Materia requerida (subj_in).");
     if(!crse) throw new Error("Código de curso requerido (crse_in).");
-    const base="https://ssb.unab.cl/pls/PROD/bwckctlg.p_disp_listcrse";
+    const base="https://ssb8.unab.cl/PROD/bwckctlg.p_disp_listcrse";
     const q=new URLSearchParams({
       term_in:term,
       subj_in:subj,
@@ -438,7 +438,7 @@ function verCursoCatalogo(){
 function verHorarioDocente(){
   try{
     const termDoc=$("term_doc").value.trim(); validarTerm(termDoc);
-    const base="https://ssb.unab.cl/pls/PROD/bwlkifac.P_FacSched";
+    const base="https://ssb8.unab.cl/PROD/bwlkifac.P_FacSched";
     const q=new URLSearchParams({term:termDoc});
     window.open(base+"?"+q.toString(), "_blank");
   }catch(e){ alert(e.message||e); }
@@ -449,7 +449,7 @@ function verListaClases(){
     const termDoc=$("term_doc").value.trim(); validarTerm(termDoc);
     const crn=$("crn_docente").value.trim();
     if(!crn) throw new Error("CRN requerido.");
-    const base="https://ssb.unab.cl/pls/PROD/bwlkfcwl.P_FacClaListSum";
+    const base="https://ssb8.unab.cl/PROD/bwlkfcwl.P_FacClaListSum";
     const q=new URLSearchParams({term:termDoc, crn});
     window.open(base+"?"+q.toString(), "_blank");
   }catch(e){ alert(e.message||e); }
@@ -460,7 +460,7 @@ function verLibroCalificaciones(){
     const termDoc=$("term_doc").value.trim(); validarTerm(termDoc);
     const crn=$("crn_docente").value.trim();
     if(!crn) throw new Error("CRN requerido.");
-    const base="https://ssb.unab.cl/pls/PROD/bwlkegrb.P_FacGradeComponents";
+    const base="https://ssb8.unab.cl/PROD/bwlkegrb.P_FacGradeComponents";
     const q=new URLSearchParams({term:termDoc,crn});
     window.open(base+"?"+q.toString(), "_blank");
   }catch(e){ alert(e.message||e); }
@@ -469,7 +469,7 @@ function verLibroCalificaciones(){
 /* (1) historial de asignaturas */
 function verHistorialAsignaturas(){
   try{
-    const base="https://ssb.unab.cl/pls/PROD/bwlkasgn.P_FacAssignHist";
+    const base="https://ssb8.unab.cl/PROD/bwlkasgn.P_FacAssignHist";
     window.open(base, "_blank");
   }catch(e){ alert(e.message||e); }
 }
