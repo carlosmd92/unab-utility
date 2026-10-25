@@ -67,18 +67,20 @@
 
   /* login embebido */
   #login-box{
-    width:380px;
-    height:180px;
+    width:350px;
+    height:130px;
     overflow:hidden;
     position:relative;
     border:1px solid #333;
   }
   #login-box iframe{
+    /* recorte calibrado para el login de Banner 9 (ancho real 980px):
+       encuadra labels ID/NIP, ambos campos y los botones Acceder/¿Olvidó NIP? */
     position:absolute;
-    top:-220px;
-    left:-60px;
-    width:600px;
-    height:600px;
+    top:-465px;
+    left:-300px;
+    width:980px;
+    height:1000px;
   }
 
   /* mejoras para móvil/tablet */
