@@ -25,7 +25,7 @@
 
   // ---- estilos (prefijados uu- para no chocar con Banner) ----
   var css =
-    "#unab-util-panel{position:fixed;top:12px;right:12px;z-index:2147483647;width:360px;max-height:92vh;overflow:auto;" +
+    "#unab-util-panel{position:fixed;top:8px;right:8px;z-index:2147483647;width:360px;max-width:calc(100vw - 16px);max-height:92vh;overflow:auto;" +
     "background:#fff;border:1px solid #888;border-radius:10px;box-shadow:0 6px 24px rgba(0,0,0,.25);" +
     "font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;font-size:13px;line-height:1.3;color:#111;}" +
     "#unab-util-panel *{box-sizing:border-box;}" +
